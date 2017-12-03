@@ -106,6 +106,7 @@ public class SongList extends AbstractMusicList {
 					songFiles.add(f);
 				}
 			}
+			Collections.sort(songFiles, Utils.songFileComparator);
 			// Did the user pick an album from 'All'?
 		}else if(albumDir.exists() && albumDir.isDirectory() && albumDir.listFiles() != null){
 			List<File> songs = Utils.getAllSongsInDirRecursive(albumDir);
