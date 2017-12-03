@@ -33,6 +33,7 @@ import android.media.AudioManager;
 import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
+import android.media.MediaPlayer.OnErrorListener;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -182,13 +183,24 @@ public class MusicPlaybackService extends Service {
 		mReadaheadThread = new ReadaheadThread();
 
 		mp.setOnCompletionListener(new OnCompletionListener() {
-
 			@Override
 			public void onCompletion(MediaPlayer mp) {
 				Log.i(TAG, "Song complete");
 				next();
 			}
+		});
 
+		mp.setOnErrorListener(new OnErrorListener() {
+			@Override
+			public boolean onError(MediaPlayer mp, int what, int extra) {
+				final int VOLUME_SHAPER_INVALID_OPERATION = -38;
+				if (what == VOLUME_SHAPER_INVALID_OPERATION) {
+					Log.w(TAG, "Got VOLUME_SHAPER_INVALID_OPERATION error from MediaPlayer, ignoring...");
+					// By returning true, we prevent the OnCompletionListener from being called and skipping to the next song
+					return true;
+				}
+				return false;
+			}
 		});
 
 		// https://developer.android.com/training/managing-audio/audio-focus.html
